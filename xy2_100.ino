@@ -100,6 +100,7 @@ void XY2_Send_First_Bit(bool x)
 	for (int i = 0; i < 90; ++i)	NOP();
 }
 
+
 void XY2_Send_Last_Bit(bool px, bool py)
 {
 	PinV(DATA_X, px);
