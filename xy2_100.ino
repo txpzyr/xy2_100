@@ -10,7 +10,9 @@
 #define  DATA_Y 17
 
 #define T_UP 15
-#define T_DOWN 8
+#define T_DOWN 7
+
+//pin1-4 需要相对GND有1.2v
 
 void setup()
 {
@@ -57,17 +59,21 @@ uint8_t parityCheck(uint16_t val)
 }
 
 int ms = 1000;
+int maxA = 32000;
 void loop()
 {
 	if (Serial.available())
 	{
-		ms = Serial.parseInt();
-		Serial.println(ms);
-
+		String line = Serial.readString();
+		Serial.println(line);
+		int index = 0;
+		ms = GetFloat(index, line);
+		maxA = GetFloat(index, line);
 	}
+
 	unsigned long tick = millis();
-	cx = 30000 + 30000 * sin(((tick % ms) / (float)ms) * 2 * PI);
-	cy = 30000 + 30000 * cos(((tick % ms) / (float)ms) * 2 * PI);
+	cx = 32000 + maxA * sin(((tick % ms) / (float)ms) * 2 * PI);
+	cy = 32000 + maxA * cos(((tick % ms) / (float)ms) * 2 * PI);
 
 	px = !parityCheck(cx);
 	py = !parityCheck(cy);
@@ -135,4 +141,39 @@ void XY2_Send_Last_Bit(bool px, bool py)
 	CLKL;
 	for (int i = 0; i < T_DOWN; ++i)	NOP();
 	SYNCH;
+}
+
+
+
+double GetFloat(int& index, String line)
+{
+	int data = 0;
+	double left = 0, right = 0;
+	double pos = 10;
+	bool point = false;
+	bool neg = false;
+	while ((data = line[index]) != ' ' && data != '\n' && data > 0)
+	{
+		if (data == '-')
+		{
+			neg = true;
+		}
+		else if (data == '.')
+		{
+			point = true;
+		}
+		else if (point == false)
+		{
+			left = left * 10 + (data - '0');
+		}
+		else
+		{
+			right = right + (data - '0') / pos;
+			pos *= 10;
+		}
+		index++;
+	}
+	index++;
+	double ret = left + right;
+	return neg ? -ret : ret;
 }
