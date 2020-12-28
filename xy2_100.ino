@@ -1,13 +1,16 @@
 /*
     Name:       xy2_100.ino
     Created:	2020/2/19 11:14:37
-    Author:     TPC\tp
+    Author:     TPC\TangPeng
 */
 
 #define  CLK 2
 #define  SYNC 4
 #define  DATA_X 16
 #define  DATA_Y 17
+
+#define T_UP 15
+#define T_DOWN 8
 
 void setup()
 {
@@ -42,11 +45,12 @@ void reader(void* pvParameters)
 	}
 }
 
-uint8_t parityCheck(uint16_t val) {
+uint8_t parityCheck(uint16_t val)
+{
 	uint8_t cnt = 0;
-	while (val) {
-		if (val & 0x01)
-			cnt++;
+	while (val) 
+	{
+		if (val & 0x01) cnt++;
 		val >>= 1;
 	}
 	return cnt & 0x01;
@@ -95,24 +99,11 @@ void XY2_Send_First_Bit(bool x)
 	SYNCH;//同步拉高
 	CLKH; //clock拉高
 	
-	for (int i = 0; i < 100; ++i) NOP();
+	for (int i = 0; i < T_UP; ++i) NOP();
 	CLKL;
-	for (int i = 0; i < 90; ++i)	NOP();
+	for (int i = 0; i < T_DOWN; ++i)	NOP();
 }
 
-
-void XY2_Send_Last_Bit(bool px, bool py)
-{
-	PinV(DATA_X, px);
-	PinV(DATA_Y, py); 
-	SYNCL;//同步拉低
-	CLKH; //clock拉高
-	
-	for (int i = 0; i < 100; ++i) NOP();
-	CLKL;
-	for (int i = 0; i < 900; ++i)	NOP();
-	SYNCH;
-}
 
 void XY2_Send_byte(uint16_t tx, uint16_t ty) //发送一个字符 char类型
 {
@@ -127,8 +118,21 @@ void XY2_Send_byte(uint16_t tx, uint16_t ty) //发送一个字符 char类型
 		tx <<= 1;
 		ty <<= 1;
 		CLKH;
-		for (int i = 0; i < 100; ++i) NOP();
+		for (int i = 0; i < T_UP; ++i) NOP();
 		CLKL;
-		for (int i = 0; i < 90; ++i)	NOP();
+		for (int i = 0; i < T_DOWN; ++i)	NOP();
 	}
+}
+
+void XY2_Send_Last_Bit(bool px, bool py)
+{
+	PinV(DATA_X, px);
+	PinV(DATA_Y, py); 
+	SYNCL;//同步拉低
+	CLKH; //clock拉高
+	
+	for (int i = 0; i < T_UP; ++i) NOP();
+	CLKL;
+	for (int i = 0; i < T_DOWN; ++i)	NOP();
+	SYNCH;
 }

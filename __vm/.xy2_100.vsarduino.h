@@ -21,7 +21,7 @@
 #define ARDUINO 108010
 #define ARDUINO_ESP32_DEV
 #define ESP32
-#define CORE_DEBUG_LEVEL 5
+#define CORE_DEBUG_LEVEL 0
 #define __cplusplus 201103L
 #define __inline__
 #define __asm__(x)
